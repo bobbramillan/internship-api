@@ -20,7 +20,8 @@ public class InternshipController {
 
     @GetMapping
     public List<Internship> getAllInternships() {
-        return repository.findAll();
+        LocalDate thirtyDaysAgo = LocalDate.now().minusDays(30);
+        return repository.findByDatePostedAfter(thirtyDaysAgo);
     }
 
     @GetMapping("/{id}")
@@ -38,7 +39,8 @@ public class InternshipController {
 
     @GetMapping("/search")
     public List<Internship> searchByCompany(@RequestParam String company) {
-        return repository.findAll().stream()
+        LocalDate thirtyDaysAgo = LocalDate.now().minusDays(30);
+        return repository.findByDatePostedAfter(thirtyDaysAgo).stream()
                 .filter(i -> i.getCompany().toLowerCase().contains(company.toLowerCase()))
                 .toList();
     }
@@ -47,9 +49,18 @@ public class InternshipController {
     public ResponseEntity<String> refreshInternships() {
         try {
             List<Internship> fetched = gitHubService.fetchInternships();
+            LocalDate thirtyDaysAgo = LocalDate.now().minusDays(30);
 
             int newCount = 0;
+            int skippedOld = 0;
+
             for (Internship internship : fetched) {
+                // Only save if within last 30 days
+                if (internship.getDatePosted().isBefore(thirtyDaysAgo)) {
+                    skippedOld++;
+                    continue;
+                }
+
                 boolean exists = repository.existsByCompanyAndRoleAndDatePosted(
                         internship.getCompany(),
                         internship.getRole(),
@@ -62,7 +73,7 @@ public class InternshipController {
                 }
             }
 
-            return ResponseEntity.ok("Refreshed! Added " + newCount + " new internships");
+            return ResponseEntity.ok("Refreshed! Added " + newCount + " new internships (skipped " + skippedOld + " older than 30 days)");
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
                     .body("Error: " + e.getMessage());
@@ -72,11 +83,5 @@ public class InternshipController {
     @GetMapping("/count")
     public long getCount() {
         return repository.count();
-    }
-
-    @GetMapping("/last30days")
-    public List<Internship> getLast30Days() {
-        LocalDate thirtyDaysAgo = LocalDate.now().minusDays(30);
-        return repository.findByDatePostedAfter(thirtyDaysAgo);
     }
 }

@@ -33,13 +33,12 @@ public class InternshipScheduler {
             }
 
             int newCount = 0;
-            int updatedCount = 0;
             int skippedOld = 0;
 
             LocalDate thirtyDaysAgo = LocalDate.now().minusDays(30);
 
             for (Internship internship : fetchedInternships) {
-                // Skip if older than 30 days
+                // Only save if posted within last 30 days
                 if (internship.getDatePosted().isBefore(thirtyDaysAgo)) {
                     skippedOld++;
                     continue;
@@ -54,13 +53,11 @@ public class InternshipScheduler {
                 if (!exists) {
                     repository.save(internship);
                     newCount++;
-                } else {
-                    updatedCount++;
                 }
             }
 
-            logger.info("Poll complete: {} new, {} existing, {} skipped (older than 30 days)",
-                    newCount, updatedCount, skippedOld);
+            logger.info("Poll complete: {} new internships saved, {} skipped (older than 30 days)",
+                    newCount, skippedOld);
 
         } catch (Exception e) {
             logger.error("Error during GitHub poll: " + e.getMessage(), e);
