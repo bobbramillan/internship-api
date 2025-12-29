@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: internship-api
+    runtime: java
+    buildCommand: ./mvnw clean install -DskipTests
+    startCommand: java -jar target/internship-api-0.0.1-SNAPSHOT.jar
+    envVars:
+      - key: JAVA_OPTS
+        value: -Xmx512m

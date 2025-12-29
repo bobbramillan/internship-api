@@ -1,0 +1,12 @@
+2025-12-29 00:14:21.121030-05:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLDataException: Value too long for column "APPLICATION_LINK CHARACTER VARYING(255)": "'https://careers.teradata.com/jobs/219629/software-engineering-intern?rx_a=0&rx_... (363)"; SQL statement:
+insert into internships (application_link,company,created_at,date_posted,location,role,id) values (?,?,?,?,?,?,default) [22001-240]
+2025-12-29 00:14:53.616237-05:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLDataException: Value too long for column "APPLICATION_LINK CHARACTER VARYING(255)": "'https://careers.teradata.com/jobs/219629/software-engineering-intern?rx_a=0&rx_... (363)"; SQL statement:
+insert into internships (application_link,company,created_at,date_posted,location,role,id) values (?,?,?,?,?,?,default) [22001-240]
+2025-12-29 00:18:04.948487-05:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLDataException: Value too long for column "LOCATION CHARACTER VARYING(500)": "'47 locationsBerkeley, CACulver City, CACupertino, CAEast Palo Alto, CAIrvine, C... (619)"; SQL statement:
+insert into internships (application_link,company,created_at,date_posted,location,role,id) values (?,?,?,?,?,?,default) [22001-240]
+2025-12-29 00:24:50.116086-05:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLDataException: Value too long for column "LOCATION CHARACTER VARYING(500)": "'47 locationsBerkeley, CACulver City, CACupertino, CAEast Palo Alto, CAIrvine, C... (619)"; SQL statement:
+insert into internships (application_link,company,created_at,date_posted,location,role,id) values (?,?,?,?,?,?,default) [22001-240]
