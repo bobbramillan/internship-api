@@ -3,6 +3,7 @@ package com.bav.internshipapi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
 
@@ -47,6 +48,20 @@ public class JobController {
     @GetMapping("/sponsorship")
     public List<Job> filterBySponsorship(@RequestParam String type) {
         return repository.findByIsActiveTrueAndSponsorshipContainingIgnoreCase(type);
+    }
+
+    @GetMapping("/")
+    @ResponseBody
+    public String home() {
+        long count = repository.countByIsActiveTrue();
+        return "New Grad Jobs API — " + count + " active listings\n\n" +
+                "Endpoints:\n" +
+                "  GET /api/jobs\n" +
+                "  GET /api/jobs/search?company=Google\n" +
+                "  GET /api/jobs/sponsorship?type=Sponsors\n" +
+                "  GET /api/jobs/count\n" +
+                "  GET /api/jobs/{id}\n\n" +
+                "Docs: https://github.com/bobbramillan/internship-api";
     }
 
     // GET /api/jobs/count
