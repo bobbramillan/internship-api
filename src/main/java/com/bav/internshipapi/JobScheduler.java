@@ -76,6 +76,15 @@ public class JobScheduler {
         logger.info("Sync complete: {} added, {} updated", added, updated);
     }
 
+    // runs at 3am daily to hard-delete jobs older than 29 days
+    @Scheduled(cron = "0 0 3 * * *")
+    @Transactional
+    public void purgeOldJobs() {
+        LocalDate cutoff = LocalDate.now().minusDays(MAX_AGE_DAYS);
+        repository.deleteByDatePostedBefore(cutoff);
+        logger.info("Purged jobs older than {} days", MAX_AGE_DAYS);
+    }
+
     private boolean strEqual(String a, String b) {
         if (a == null && b == null) return true;
         if (a == null || b == null) return false;

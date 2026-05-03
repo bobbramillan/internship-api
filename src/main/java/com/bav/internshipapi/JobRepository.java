@@ -18,4 +18,8 @@ public interface JobRepository extends JpaRepository<Job, Long> {
     List<Job> findByIsActiveTrueAndSponsorshipContainingIgnoreCaseAndDatePostedAfter(String sponsorship, LocalDate cutoff);
 
     long countByIsActiveTrueAndDatePostedAfter(LocalDate cutoff);
+
+    List<Job> findByDatePostedAfter(LocalDate cutoff);
+
+    void deleteByDatePostedBefore(LocalDate cutoff);
 }
