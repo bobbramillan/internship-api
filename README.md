@@ -25,13 +25,13 @@ curl https://internship-api-production-521e.up.railway.app/api/jobs/count
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/api/jobs` | All active listings |
-| GET | `/api/jobs/all` | All listings (active + inactive) |
+| GET | `/api/jobs` | Active listings posted within the last 29 days |
+| GET | `/api/jobs/all` | All listings (active + inactive) within the last 29 days |
 | GET | `/api/jobs/{id}` | Single listing by ID |
-| GET | `/api/jobs/search?company=Google` | Filter active by company (partial, case-insensitive) |
-| GET | `/api/jobs/sponsorship?type=Sponsors` | Filter by sponsorship status |
-| GET | `/api/jobs/count` | Count of active listings |
-| POST | `/api/jobs/refresh` | Manually trigger a sync |
+| GET | `/api/jobs/search?company=Google` | Filter active listings (≤29 days) by company (partial, case-insensitive) |
+| GET | `/api/jobs/sponsorship?type=Sponsors` | Filter active listings (≤29 days) by sponsorship status |
+| GET | `/api/jobs/count` | Count of active listings posted within the last 29 days |
+| POST | `/api/jobs/refresh` | Manually trigger a sync (only writes listings ≤29 days old) |
 
 ---
 
@@ -65,7 +65,7 @@ Each job object looks like this:
 | `title` | string | Job title |
 | `locations` | string[] | List of locations (can be multiple) |
 | `applicationUrl` | string | Direct link to apply |
-| `datePosted` | string | Date posted (YYYY-MM-DD) |
+| `datePosted` | string | Date posted (YYYY-MM-DD) — listings older than 29 days are excluded from results |
 | `sponsorship` | string | Sponsorship status (e.g. "Sponsors", "Other") |
 | `isActive` | boolean | Whether the listing is still open |
 | `createdAt` | string | When the record was added to this API |
@@ -133,6 +133,7 @@ for job in jobs:
 - **No authentication required** — the API is fully public and free to use
 - **CORS enabled** — can be called directly from any web app or browser
 - **Auto-syncs every 30 minutes** from SimplifyJobs
+- **29-day filter** — only listings posted within the last 29 days are returned across all endpoints
 - **Active listings only** by default — use `/api/jobs/all` to include closed roles
 - Data covers SWE, PM, and quant roles in the US, Canada, and remote
 

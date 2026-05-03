@@ -30,16 +30,17 @@ public class JobController {
         return repository.findByIsActiveTrueAndDatePostedAfter(cutoff());
     }
 
-    // GET /api/jobs/all — active + inactive (no age filter)
+    // GET /api/jobs/all — active + inactive, still limited to 29 days
     @GetMapping("/all")
     public List<Job> getAllJobs() {
-        return repository.findAll();
+        return repository.findByDatePostedAfter(cutoff());
     }
 
     // GET /api/jobs/{id}
     @GetMapping("/{id}")
     public ResponseEntity<Job> getById(@PathVariable Long id) {
         return repository.findById(id)
+                .filter(job -> job.getDatePosted() != null && job.getDatePosted().isAfter(cutoff()))
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -72,6 +73,7 @@ public class JobController {
             }
             int added = 0, updated = 0;
             for (Job incoming : fetched) {
+                if (incoming.getDatePosted() == null || !incoming.getDatePosted().isAfter(cutoff())) continue;
                 var existing = repository.findBySimplifyId(incoming.getSimplifyId());
                 if (existing.isEmpty()) {
                     repository.save(incoming);

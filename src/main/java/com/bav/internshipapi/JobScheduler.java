@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +21,8 @@ public class JobScheduler {
 
     @Autowired
     private JobRepository repository;
+
+    private static final int MAX_AGE_DAYS = 29;
 
     // listings.json is updated every 30 minutes by Simplify's bot, so poll every 30 min
     @Scheduled(fixedRate = 1800000, initialDelay = 5000)
@@ -36,7 +39,10 @@ public class JobScheduler {
         int added = 0;
         int updated = 0;
 
+        LocalDate cutoff = LocalDate.now().minusDays(MAX_AGE_DAYS);
+
         for (Job incoming : fetched) {
+            if (incoming.getDatePosted() == null || !incoming.getDatePosted().isAfter(cutoff)) continue;
             Optional<Job> existing = repository.findBySimplifyId(incoming.getSimplifyId());
 
             if (existing.isEmpty()) {
