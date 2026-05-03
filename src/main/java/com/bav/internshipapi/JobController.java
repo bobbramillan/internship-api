@@ -3,6 +3,7 @@ package com.bav.internshipapi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.time.LocalDate;
 
 import java.util.List;
 
@@ -17,13 +18,19 @@ public class JobController {
     @Autowired
     private SimplifyService simplifyService;
 
-    // GET /api/jobs — all active jobs
-    @GetMapping
-    public List<Job> getActiveJobs() {
-        return repository.findByIsActiveTrue();
+    private static final int MAX_AGE_DAYS = 29;
+
+    private LocalDate cutoff() {
+        return LocalDate.now().minusDays(MAX_AGE_DAYS);
     }
 
-    // GET /api/jobs/all — active + inactive
+    // GET /api/jobs — active jobs posted within the last 29 days
+    @GetMapping
+    public List<Job> getActiveJobs() {
+        return repository.findByIsActiveTrueAndDatePostedAfter(cutoff());
+    }
+
+    // GET /api/jobs/all — active + inactive (no age filter)
     @GetMapping("/all")
     public List<Job> getAllJobs() {
         return repository.findAll();
@@ -40,20 +47,19 @@ public class JobController {
     // GET /api/jobs/search?company=Google
     @GetMapping("/search")
     public List<Job> searchByCompany(@RequestParam String company) {
-        return repository.findByIsActiveTrueAndCompanyContainingIgnoreCase(company);
+        return repository.findByIsActiveTrueAndCompanyContainingIgnoreCaseAndDatePostedAfter(company, cutoff());
     }
 
     // GET /api/jobs/sponsorship?type=Sponsors
     @GetMapping("/sponsorship")
     public List<Job> filterBySponsorship(@RequestParam String type) {
-        return repository.findByIsActiveTrueAndSponsorshipContainingIgnoreCase(type);
+        return repository.findByIsActiveTrueAndSponsorshipContainingIgnoreCaseAndDatePostedAfter(type, cutoff());
     }
-
 
     // GET /api/jobs/count
     @GetMapping("/count")
     public long countActive() {
-        return repository.countByIsActiveTrue();
+        return repository.countByIsActiveTrueAndDatePostedAfter(cutoff());
     }
 
     // POST /api/jobs/refresh — manual sync trigger

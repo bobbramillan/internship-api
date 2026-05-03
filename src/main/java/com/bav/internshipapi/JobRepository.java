@@ -2,6 +2,7 @@ package com.bav.internshipapi;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -10,11 +11,11 @@ public interface JobRepository extends JpaRepository<Job, Long> {
 
     Optional<Job> findBySimplifyId(String simplifyId);
 
-    List<Job> findByIsActiveTrue();
+    List<Job> findByIsActiveTrueAndDatePostedAfter(LocalDate cutoff);
 
-    List<Job> findByIsActiveTrueAndCompanyContainingIgnoreCase(String company);
+    List<Job> findByIsActiveTrueAndCompanyContainingIgnoreCaseAndDatePostedAfter(String company, LocalDate cutoff);
 
-    List<Job> findByIsActiveTrueAndSponsorshipContainingIgnoreCase(String sponsorship);
+    List<Job> findByIsActiveTrueAndSponsorshipContainingIgnoreCaseAndDatePostedAfter(String sponsorship, LocalDate cutoff);
 
-    long countByIsActiveTrue();
+    long countByIsActiveTrueAndDatePostedAfter(LocalDate cutoff);
 }
