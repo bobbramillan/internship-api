@@ -19,9 +19,9 @@ public class SimplifyService {
 
     private static final Logger logger = LoggerFactory.getLogger(SimplifyService.class);
 
-    // listings.json is on the dev branch and updated every 30 minutes by Simplify's bot
+    // listings.json is on the dev branch and updated daily by Simplify's bot
     private static final String LISTINGS_URL =
-            "https://raw.githubusercontent.com/SimplifyJobs/New-Grad-Positions/dev/.github/scripts/listings.json";
+            "https://raw.githubusercontent.com/SimplifyJobs/Summer2027-Internships/dev/.github/scripts/listings.json";
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
@@ -91,7 +91,17 @@ public class SimplifyService {
         return jobs;
     }
 
+    // Only keep Software Engineering roles — category is "Software" (Simplify)
+    // or "Software Engineering" (AlmondCroffle); other categories (Hardware,
+    // Product, Quant, AI/ML/Data, etc.) are dropped.
+    private boolean isSoftwareEngineering(JsonNode node) {
+        String category = node.path("category").asText("");
+        return category.toLowerCase().contains("software");
+    }
+
     private Job parseJob(JsonNode node) {
+        if (!isSoftwareEngineering(node)) return null;
+
         String simplifyId = node.path("id").asText(null);
         if (simplifyId == null || simplifyId.isBlank()) return null;
 

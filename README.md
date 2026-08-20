@@ -1,6 +1,6 @@
-# New Grad Jobs API
+# SWE Internship API
 
-A free, public REST API serving new grad SWE, PM, and quant job listings for 2025 & 2026 graduates. Data is sourced from [SimplifyJobs/New-Grad-Positions](https://github.com/SimplifyJobs/New-Grad-Positions) and syncs automatically every 30 minutes.
+A free, public REST API serving Software Engineering internship listings for Summer 2027. Data is sourced from [SimplifyJobs/Summer2027-Internships](https://github.com/SimplifyJobs/Summer2027-Internships), filtered to Software/Software Engineering category listings only, and syncs automatically every 30 minutes.
 
 **Base URL:** `https://internship-api-production-521e.up.railway.app`
 
@@ -135,7 +135,7 @@ for job in jobs:
 - **Auto-syncs every 30 minutes** from SimplifyJobs
 - **29-day filter** — only listings posted within the last 29 days are returned across all endpoints
 - **Active listings only** by default — use `/api/jobs/all` to include closed roles
-- Data covers SWE, PM, and quant roles in the US, Canada, and remote
+- Data covers Software Engineering internships only (category = "Software" / "Software Engineering") in the US, Canada, and remote
 
 ---
 
@@ -168,4 +168,4 @@ cd internship-api
 
 ## Data Source
 
-All job data is sourced from [SimplifyJobs/New-Grad-Positions](https://github.com/SimplifyJobs/New-Grad-Positions), maintained by [Coder Quad](https://github.com/coderquad) and [Simplify](https://simplify.jobs). This API is an unofficial wrapper — if you find it useful, star their repo too.
+All job data is sourced from [SimplifyJobs/Summer2027-Internships](https://github.com/SimplifyJobs/Summer2027-Internships), maintained by Pitt CSC and [Simplify](https://simplify.jobs). This API is an unofficial wrapper, filtered to Software Engineering roles only — if you find it useful, star their repo too.

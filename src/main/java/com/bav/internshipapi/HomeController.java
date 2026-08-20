@@ -16,7 +16,7 @@ public class HomeController {
     @GetMapping("/")
     public String home() {
         long count = repository.countByIsActiveTrueAndDatePostedAfter(LocalDate.now().minusDays(MAX_AGE_DAYS));
-        return "New Grad Jobs API — " + count + " active listings\n\n" +
+        return "SWE Internship API — " + count + " active listings\n\n" +
                 "Endpoints:\n" +
                 "  GET /api/jobs\n" +
                 "  GET /api/jobs/search?company=Google\n" +
