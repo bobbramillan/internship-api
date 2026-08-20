@@ -9,10 +9,10 @@
         <relativePath/>
     </parent>
     <groupId>com.bav</groupId>
-    <artifactId>new-grad-api</artifactId>
+    <artifactId>internship-api</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>new-grad-api</name>
-    <description>New Grad Jobs API — powered by SimplifyJobs/New-Grad-Positions</description>
+    <name>internship-api</name>
+    <description>SWE Internship API — powered by SimplifyJobs/Summer2027-Internships</description>
 
     <properties>
         <java.version>17</java.version>
