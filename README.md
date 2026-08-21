@@ -167,12 +167,27 @@ cd internship-api
 # H2 console at http://localhost:8080/h2-console
 ```
 
+### Running Locally with Docker
+
+The repo includes a multi-stage `Dockerfile` (Maven build stage → slim JRE-alpine runtime, non-root user):
+
+```bash
+docker build -t internship-api .
+docker run -p 8080:8080 internship-api
+# API at http://localhost:8080
+```
+
+---
+
 ## Deploying to Railway
+
+This service deploys on Railway from the repo's `Dockerfile` — a Maven build stage compiles the fat JAR, and a `eclipse-temurin:17-jre-alpine` runtime stage runs it, keeping the deployed image lean (~117 MB).
 
 1. Fork this repo and push to GitHub
 2. Create a new Railway project → Deploy from GitHub repo
-3. Add a PostgreSQL plugin to the project
-4. On your app service, set these environment variables (using Railway's `${{Postgres.VAR}}` reference syntax):
+3. In the service's **Settings → Build**, confirm the **Builder** is set to **Dockerfile** (Railway auto-detects the `Dockerfile` at the repo root; switch manually if it defaults to Nixpacks/Railpack)
+4. Add a PostgreSQL plugin to the project
+5. On your app service, set these environment variables (using Railway's `${{Postgres.VAR}}` reference syntax):
 
 | Variable | Value |
 |----------|-------|
@@ -185,7 +200,7 @@ cd internship-api
 
 > **Note:** Railway's `DATABASE_URL` variable on the Postgres service itself is a plain connection URI (no `jdbc:` prefix), which the JDBC driver will reject. Construct your app's `DATABASE_URL` manually from the individual `PGHOST`/`PGPORT`/`PGDATABASE` fields as shown above.
 
-5. On the app service → Settings → Networking → Generate Domain, using port `8080`
+6. On the app service → Settings → Networking → Generate Domain, using port `8080`
 
 ---
 
