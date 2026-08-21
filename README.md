@@ -1,3 +1,52 @@
+# SWE Internship API
+
+A free, public REST API serving Software Engineering internship listings for Summer 2027. Data is sourced from [SimplifyJobs/Summer2027-Internships](https://github.com/SimplifyJobs/Summer2027-Internships), filtered to Software/Software Engineering category listings only, and syncs automatically every 30 minutes.
+
+**Base URL:** `https://internship-api-production-a9b7.up.railway.app`
+
+---
+
+## Quick Start
+
+```bash
+# Get all active listings
+curl https://internship-api-production-a9b7.up.railway.app/api/jobs
+
+# Search by company
+curl "https://internship-api-production-a9b7.up.railway.app/api/jobs/search?company=Google"
+
+# Get count of active listings
+curl https://internship-api-production-a9b7.up.railway.app/api/jobs/count
+```
+
+---
+
+## Endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/jobs` | Active listings posted within the last 29 days |
+| GET | `/api/jobs/all` | All listings (active + inactive) within the last 29 days |
+| GET | `/api/jobs/{id}` | Single listing by ID |
+| GET | `/api/jobs/search?company=Google` | Filter active listings (≤29 days) by company (partial, case-insensitive) |
+| GET | `/api/jobs/sponsorship?type=Sponsors` | Filter active listings (≤29 days) by sponsorship status |
+| GET | `/api/jobs/count` | Count of active listings posted within the last 29 days |
+| POST | `/api/jobs/refresh` | Manually trigger a sync (only writes listings ≤29 days old) |
+
+---
+
+## Rate Limiting
+
+To keep the API responsive for everyone, `/api/**` endpoints are limited to **60 requests per minute per IP address**, using a token-bucket algorithm.
+
+If you exceed the limit, you'll get:
+
+```
+HTTP 429 Too Many Requests
+Retry-After: 60
+
+{"error":"Rate limit exceeded. Max 60 requests per minute. Try again shortly."}
+```
 
 The root docs page (`/`) is not rate-limited.
 
