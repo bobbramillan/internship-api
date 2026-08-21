@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -36,8 +37,18 @@ public class Job {
     @Column(name = "application_url", length = 1000)
     private String applicationUrl;
 
+    // Day-granularity — used for the 29-day cutoff/purge queries. Kept separate
+    // from postedAt below because those queries are written against LocalDate.
     @Column(name = "date_posted")
     private LocalDate datePosted;
+
+    // Full-precision posting timestamp, straight from the source's date_posted
+    // epoch seconds. Two listings can land on the same datePosted day but at
+    // very different times (e.g. one at 00:00:00, another at 19:45:52) — Simplify's
+    // own site orders by this exact instant, so same-day ordering here needs it too;
+    // datePosted alone can't distinguish them.
+    @Column(name = "posted_at")
+    private Instant postedAt;
 
     @Column(name = "is_active")
     private boolean isActive;

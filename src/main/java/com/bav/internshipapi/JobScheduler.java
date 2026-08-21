@@ -74,6 +74,11 @@ public class JobScheduler {
                     job.setSponsorship(incoming.getSponsorship());
                     changed = true;
                 }
+                if (job.getPostedAt() == null ? incoming.getPostedAt() != null
+                        : !job.getPostedAt().equals(incoming.getPostedAt())) {
+                    job.setPostedAt(incoming.getPostedAt());
+                    changed = true;
+                }
 
                 if (changed) {
                     repository.save(job);

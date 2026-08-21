@@ -16,7 +16,7 @@ public class JobController {
     private JobRepository repository;
 
     @Autowired
-    private SimplifyService simplifyService;
+    private JobScheduler jobScheduler;
 
     private static final int MAX_AGE_DAYS = 29;
 
@@ -63,29 +63,17 @@ public class JobController {
         return repository.countByIsActiveTrueAndDatePostedAfter(cutoff());
     }
 
-    // POST /api/jobs/refresh — manual sync trigger
+    // POST /api/jobs/refresh — manual sync trigger.
+    // Delegates to JobScheduler.syncJobs() rather than keeping its own copy of the
+    // sync logic — a second copy here previously drifted out of sync (literally):
+    // it only updated `active` and skipped url/sponsorship/postedAt updates and the
+    // orphan-reconciliation pass, so manual syncs didn't get the same fixes as the
+    // scheduled ones.
     @PostMapping("/refresh")
     public ResponseEntity<String> refresh() {
         try {
-            List<Job> fetched = simplifyService.fetchJobs();
-            if (fetched.isEmpty()) {
-                return ResponseEntity.ok("No new data from source (may be cached)");
-            }
-            int added = 0, updated = 0;
-            for (Job incoming : fetched) {
-                if (incoming.getDatePosted() == null || !incoming.getDatePosted().isAfter(cutoff())) continue;
-                var existing = repository.findBySimplifyId(incoming.getSimplifyId());
-                if (existing.isEmpty()) {
-                    repository.save(incoming);
-                    added++;
-                } else {
-                    Job job = existing.get();
-                    boolean changed = false;
-                    if (job.isActive() != incoming.isActive()) { job.setActive(incoming.isActive()); changed = true; }
-                    if (changed) { repository.save(job); updated++; }
-                }
-            }
-            return ResponseEntity.ok("Refreshed: " + added + " added, " + updated + " updated");
+            jobScheduler.syncJobs();
+            return ResponseEntity.ok("Sync complete");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
         }

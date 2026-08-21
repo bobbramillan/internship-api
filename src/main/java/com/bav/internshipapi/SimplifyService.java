@@ -134,15 +134,17 @@ public class SimplifyService {
             }
         }
 
-        // date_posted is a Unix timestamp (seconds)
+        // date_posted is a Unix timestamp (seconds). Keep both the day-only LocalDate
+        // (for the 29-day cutoff queries) and the full Instant (for correct same-day
+        // ordering — Simplify's site sorts by exact time, not just day).
         LocalDate datePosted = null;
+        Instant postedAt = null;
         JsonNode dateNode = node.path("date_posted");
         if (!dateNode.isMissingNode() && !dateNode.isNull()) {
             try {
                 long epochSeconds = dateNode.asLong();
-                datePosted = Instant.ofEpochSecond(epochSeconds)
-                        .atZone(ZoneId.of("UTC"))
-                        .toLocalDate();
+                postedAt = Instant.ofEpochSecond(epochSeconds);
+                datePosted = postedAt.atZone(ZoneId.of("UTC")).toLocalDate();
             } catch (Exception e) {
                 logger.debug("Could not parse date_posted for {}: {}", simplifyId, e.getMessage());
             }
@@ -165,6 +167,7 @@ public class SimplifyService {
         job.setLocations(locations);
         job.setApplicationUrl(applicationUrl);
         job.setDatePosted(datePosted);
+        job.setPostedAt(postedAt);
         job.setActive(isActive);
         job.setSponsorship(sponsorship);
         return job;
