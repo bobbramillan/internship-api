@@ -21,5 +21,9 @@ public interface JobRepository extends JpaRepository<Job, Long> {
 
     List<Job> findByDatePostedAfter(LocalDate cutoff);
 
+    // Used to reconcile against a fresh listings.json snapshot — anything active
+    // in our DB but missing from the incoming batch has been fully removed upstream.
+    List<Job> findByIsActiveTrue();
+
     void deleteByDatePostedBefore(LocalDate cutoff);
 }

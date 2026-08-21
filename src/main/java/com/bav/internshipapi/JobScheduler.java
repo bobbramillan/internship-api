@@ -8,8 +8,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class JobScheduler {
@@ -38,10 +40,17 @@ public class JobScheduler {
 
         int added = 0;
         int updated = 0;
+        int deactivated = 0;
 
         LocalDate cutoff = LocalDate.now().minusDays(MAX_AGE_DAYS);
 
+        // Every ID present anywhere in this fetch, regardless of the 29-day cutoff below —
+        // used to detect listings the source has dropped entirely.
+        Set<String> incomingIds = new HashSet<>();
+
         for (Job incoming : fetched) {
+            incomingIds.add(incoming.getSimplifyId());
+
             if (incoming.getDatePosted() == null || !incoming.getDatePosted().isAfter(cutoff)) continue;
             Optional<Job> existing = repository.findBySimplifyId(incoming.getSimplifyId());
 
@@ -73,7 +82,21 @@ public class JobScheduler {
             }
         }
 
-        logger.info("Sync complete: {} added, {} updated", added, updated);
+        // Reconcile: a job we still have marked active but that no longer appears
+        // anywhere in this fresh snapshot has been fully removed upstream (not just
+        // flagged inactive) — Simplify does this when it prunes a listing outright.
+        // Without this, such rows never get revisited again and can sit "active"
+        // indefinitely, since their (correct, original) datePosted may still be
+        // within the 29-day purge window.
+        for (Job dbJob : repository.findByIsActiveTrue()) {
+            if (!incomingIds.contains(dbJob.getSimplifyId())) {
+                dbJob.setActive(false);
+                repository.save(dbJob);
+                deactivated++;
+            }
+        }
+
+        logger.info("Sync complete: {} added, {} updated, {} deactivated (removed upstream)", added, updated, deactivated);
     }
 
     // runs at 3am daily to hard-delete jobs older than 29 days

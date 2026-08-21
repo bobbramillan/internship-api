@@ -99,8 +99,23 @@ public class SimplifyService {
         return category.toLowerCase().contains("software");
     }
 
+    // Simplify's own README only renders listings tagged for the "Summer 2027" term —
+    // a listing can be active but tagged "Fall 2026" or "N/A" and still be in the
+    // category-2027 feed. Match that filter so this API mirrors what the README shows.
+    private static final String TARGET_TERM = "summer 2027";
+
+    private boolean isTargetTerm(JsonNode node) {
+        JsonNode termsNode = node.path("terms");
+        if (!termsNode.isArray()) return false;
+        for (JsonNode term : termsNode) {
+            if (term.asText("").trim().equalsIgnoreCase(TARGET_TERM)) return true;
+        }
+        return false;
+    }
+
     private Job parseJob(JsonNode node) {
         if (!isSoftwareEngineering(node)) return null;
+        if (!isTargetTerm(node)) return null;
 
         String simplifyId = node.path("id").asText(null);
         if (simplifyId == null || simplifyId.isBlank()) return null;
