@@ -1,37 +1,5 @@
-# SWE Internship API
 
-A free, public REST API serving Software Engineering internship listings for Summer 2027. Data is sourced from [SimplifyJobs/Summer2027-Internships](https://github.com/SimplifyJobs/Summer2027-Internships), filtered to Software/Software Engineering category listings only, and syncs automatically every 30 minutes.
-
-**Base URL:** `https://internship-api-production-521e.up.railway.app`
-
----
-
-## Quick Start
-
-```bash
-# Get all active listings
-curl https://internship-api-production-521e.up.railway.app/api/jobs
-
-# Search by company
-curl "https://internship-api-production-521e.up.railway.app/api/jobs/search?company=Google"
-
-# Get count of active listings
-curl https://internship-api-production-521e.up.railway.app/api/jobs/count
-```
-
----
-
-## Endpoints
-
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/jobs` | Active listings posted within the last 29 days |
-| GET | `/api/jobs/all` | All listings (active + inactive) within the last 29 days |
-| GET | `/api/jobs/{id}` | Single listing by ID |
-| GET | `/api/jobs/search?company=Google` | Filter active listings (≤29 days) by company (partial, case-insensitive) |
-| GET | `/api/jobs/sponsorship?type=Sponsors` | Filter active listings (≤29 days) by sponsorship status |
-| GET | `/api/jobs/count` | Count of active listings posted within the last 29 days |
-| POST | `/api/jobs/refresh` | Manually trigger a sync (only writes listings ≤29 days old) |
+The root docs page (`/`) is not rate-limited.
 
 ---
 
@@ -49,7 +17,7 @@ Each job object looks like this:
   "applicationUrl": "https://www.google.com/about/careers/...",
   "datePosted": "2025-10-31",
   "sponsorship": "Other",
-  "isActive": true,
+  "active": true,
   "createdAt": "2026-05-02",
   "updatedAt": "2026-05-02"
 }
@@ -67,7 +35,7 @@ Each job object looks like this:
 | `applicationUrl` | string | Direct link to apply |
 | `datePosted` | string | Date posted (YYYY-MM-DD) — listings older than 29 days are excluded from results |
 | `sponsorship` | string | Sponsorship status (e.g. "Sponsors", "Other") |
-| `isActive` | boolean | Whether the listing is still open |
+| `active` | boolean | Whether the listing is still open |
 | `createdAt` | string | When the record was added to this API |
 | `updatedAt` | string | When the record was last updated |
 
@@ -78,7 +46,7 @@ Each job object looks like this:
 ### JavaScript / Fetch
 
 ```javascript
-fetch('https://internship-api-production-521e.up.railway.app/api/jobs')
+fetch('https://internship-api-production-a9b7.up.railway.app/api/jobs')
   .then(res => res.json())
   .then(jobs => {
     jobs.forEach(job => {
@@ -99,11 +67,11 @@ struct Job: Codable {
     let applicationUrl: String
     let datePosted: String
     let sponsorship: String
-    let isActive: Bool
+    let active: Bool
 }
 
 func fetchJobs() {
-    let url = URL(string: "https://internship-api-production-521e.up.railway.app/api/jobs")!
+    let url = URL(string: "https://internship-api-production-a9b7.up.railway.app/api/jobs")!
     URLSession.shared.dataTask(with: url) { data, _, _ in
         guard let data = data else { return }
         let jobs = try? JSONDecoder().decode([Job].self, from: data)
@@ -117,7 +85,7 @@ func fetchJobs() {
 ```python
 import requests
 
-response = requests.get('https://internship-api-production-521e.up.railway.app/api/jobs')
+response = requests.get('https://internship-api-production-a9b7.up.railway.app/api/jobs')
 jobs = response.json()
 
 for job in jobs:
@@ -131,6 +99,7 @@ for job in jobs:
 ## Notes
 
 - **No authentication required** — the API is fully public and free to use
+- **Rate limited** — 60 requests/min per IP on `/api/**` (see [Rate Limiting](#rate-limiting))
 - **CORS enabled** — can be called directly from any web app or browser
 - **Auto-syncs every 30 minutes** from SimplifyJobs
 - **29-day filter** — only listings posted within the last 29 days are returned across all endpoints
@@ -153,16 +122,21 @@ cd internship-api
 
 1. Fork this repo and push to GitHub
 2. Create a new Railway project → Deploy from GitHub repo
-3. Add a PostgreSQL plugin
-4. Set these environment variables:
+3. Add a PostgreSQL plugin to the project
+4. On your app service, set these environment variables (using Railway's `${{Postgres.VAR}}` reference syntax):
 
 | Variable | Value |
 |----------|-------|
-| `DATABASE_URL` | `jdbc:postgresql://<host>:5432/<db>` |
+| `DATABASE_URL` | `jdbc:postgresql://${{Postgres.PGHOST}}:${{Postgres.PGPORT}}/${{Postgres.PGDATABASE}}` |
 | `DB_DRIVER` | `org.postgresql.Driver` |
-| `DB_USERNAME` | from Railway PostgreSQL plugin |
-| `DB_PASSWORD` | from Railway PostgreSQL plugin |
+| `DB_PLATFORM` | `org.hibernate.dialect.PostgreSQLDialect` |
+| `DB_USERNAME` | `${{Postgres.PGUSER}}` |
+| `DB_PASSWORD` | `${{Postgres.PGPASSWORD}}` |
 | `H2_CONSOLE` | `false` |
+
+> **Note:** Railway's `DATABASE_URL` variable on the Postgres service itself is a plain connection URI (no `jdbc:` prefix), which the JDBC driver will reject. Construct your app's `DATABASE_URL` manually from the individual `PGHOST`/`PGPORT`/`PGDATABASE` fields as shown above.
+
+5. On the app service → Settings → Networking → Generate Domain, using port `8080`
 
 ---
 
